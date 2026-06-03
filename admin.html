@@ -5,200 +5,109 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理后台</title>
 <style>
-  :root { --bg:#0a0a1a; --cyan:#00f0ff; --purple:#b400ff; --gold:#ffd740; --green:#00e676; --red:#ff5252; --text:#e0e0ff; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; min-height:100vh; padding:24px; }
-  h1 { font-size:24px; font-weight:900; letter-spacing:2px; margin-bottom:24px; background:linear-gradient(135deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:32px; }
-  .card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px; }
-  .card .l { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:6px; }
-  .card .v { font-size:24px; font-weight:900; color:var(--cyan); }
-  .section { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:24px; margin-bottom:24px; max-width:700px; }
-  .section h2 { font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:16px; }
-  .row { display:flex; justify-content:space-between; padding:8px 0; font-size:14px; border-bottom:1px solid rgba(255,255,255,0.04); }
-  .row .n { color:var(--cyan); font-weight:700; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; padding:8px 12px; color:rgba(255,255,255,0.4); font-size:11px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.06); }
-  td { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.03); }
-  .badge { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
-  .badge.ok { background:rgba(0,230,118,0.1); color:var(--green); }
-  .badge.used { background:rgba(255,82,82,0.1); color:var(--red); }
-  input, textarea, select { width:100%; padding:10px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:14px; font-family:inherit; margin-bottom:12px; }
-  textarea { min-height:100px; font-family:'Courier New',monospace; font-size:13px; line-height:1.8; resize:vertical; }
-  .btn { padding:10px 24px; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:1px; }
-  .btn-p { background:linear-gradient(135deg,var(--cyan),var(--purple)); color:#fff; }
-  .btn-t { background:linear-gradient(135deg,#ffd740,#ff9100); color:#fff; margin-left:8px; }
-  .msg { margin-top:10px; font-size:13px; min-height:20px; }
-  .tab-bar { display:flex; gap:8px; margin-bottom:24px; }
-  .tab-bar button { padding:8px 18px; background:none; border:1px solid rgba(255,255,255,0.1); border-radius:20px; color:rgba(255,255,255,0.5); cursor:pointer; font-size:13px; }
-  .tab-bar button.on { border-color:var(--cyan); color:var(--cyan); }
-  .hint { font-size:12px; color:rgba(255,255,255,0.3); margin-bottom:8px; }
+:root{--bg:#0a0a1a;--cyan:#00f0ff;--purple:#b400ff;--gold:#ffd740;--green:#00e676;--red:#ff5252;--text:#e0e0ff;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh;padding:24px;}
+h1{font-size:24px;font-weight:900;letter-spacing:2px;margin-bottom:24px;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;}
+.card .l{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;}
+.card .v{font-size:24px;font-weight:900;color:var(--cyan);}
+.section{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:24px;margin-bottom:24px;max-width:700px;}
+.section h2{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:16px;}
+.row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.row .n{color:var(--cyan);font-weight:700;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:8px 12px;color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.06);}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);}
+.badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;}
+.badge.ok{background:rgba(0,230,118,0.1);color:var(--green);}
+.badge.used{background:rgba(255,82,82,0.1);color:var(--red);}
+input,textarea,select{width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;font-family:inherit;margin-bottom:12px;}
+textarea{min-height:100px;font-family:'Courier New',monospace;font-size:13px;line-height:1.8;resize:vertical;}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;}
+.btn-p{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;}
+.btn-t{background:linear-gradient(135deg,#ffd740,#ff9100);color:#fff;margin-left:8px;}
+.msg{margin-top:10px;font-size:13px;min-height:20px;}
+.tab-bar{display:flex;gap:8px;margin-bottom:24px;}
+.tab-bar button{padding:8px 18px;background:none;border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:rgba(255,255,255,0.5);cursor:pointer;font-size:13px;}
+.tab-bar button.on{border-color:var(--cyan);color:var(--cyan);}
+.hint{font-size:12px;color:rgba(255,255,255,0.3);margin-bottom:8px;}
 </style>
 </head>
 <body>
-
 <h1>管理后台</h1>
-
 <div class="tab-bar">
-  <button class="on" onclick="switchTab('overview')">概览</button>
-  <button onclick="switchTab('import')">导入兑换码</button>
-  <button onclick="switchTab('codes')">查看码库</button>
-  <button onclick="switchTab('settings')">设置</button>
+<button class="on" onclick="switchTab('overview')">概览</button>
+<button onclick="switchTab('import')">导入</button>
+<button onclick="switchTab('codes')">码库</button>
+<button onclick="switchTab('settings')">设置</button>
 </div>
-
 <div id="tab-overview">
-  <div class="cards">
-    <div class="card"><div class="l">总抽奖</div><div class="v" id="ovDraws">-</div></div>
-    <div class="card"><div class="l">今日</div><div class="v" id="ovToday">-</div></div>
-  </div>
-  <div class="section"><h2>兑换码结余</h2>
-    <div class="row"><span>日卡</span><span class="n" id="ovDay">-</span></div>
-    <div class="row"><span>优惠券</span><span class="n" id="ovCoupon">-</span></div>
-    <div class="row"><span>小时卡</span><span class="n" id="ovHour">-</span></div>
-    <div class="row"><span>周卡</span><span class="n" id="ovWeek">-</span></div>
-  </div>
-  <div class="section"><h2>奖品分布</h2>
-    <div class="row"><span>日卡</span><span class="n" id="ovPDay">0</span></div>
-    <div class="row"><span>优惠券</span><span class="n" id="ovPCoupon">0</span></div>
-    <div class="row"><span>小时卡</span><span class="n" id="ovPHour">0</span></div>
-    <div class="row"><span>周卡</span><span class="n" id="ovPWeek">0</span></div>
-  </div>
+<div class="cards">
+<div class="card"><div class="l">总抽奖</div><div class="v" id="ovDraws">-</div></div>
+<div class="card"><div class="l">今日</div><div class="v" id="ovToday">-</div></div>
 </div>
-
+<div class="section"><h2>兑换码结余</h2>
+<div class="row"><span>日卡</span><span class="n" id="ovDay">-</span></div>
+<div class="row"><span>优惠券</span><span class="n" id="ovCoupon">-</span></div>
+<div class="row"><span>小时卡</span><span class="n" id="ovHour">-</span></div>
+<div class="row"><span>周卡</span><span class="n" id="ovWeek">-</span></div>
+</div>
+<div class="section"><h2>奖品分布</h2>
+<div class="row"><span>日卡</span><span class="n" id="ovPDay">0</span></div>
+<div class="row"><span>优惠券</span><span class="n" id="ovPCoupon">0</span></div>
+<div class="row"><span>小时卡</span><span class="n" id="ovPHour">0</span></div>
+<div class="row"><span>周卡</span><span class="n" id="ovPWeek">0</span></div>
+</div>
+</div>
 <div id="tab-import" style="display:none">
-  <div class="section"><h2>导入兑换码</h2>
-    <select id="impType">
-      <option value="dayCard">日卡</option>
-      <option value="coupon">优惠券</option>
-      <option value="hourCard">小时卡</option>
-      <option value="weekCard">周卡</option>
-    </select>
-    <div class="hint">格式：一行一个兑换码。员工子后台格式：员工名,兑换码</div>
-    <textarea id="impCodeList" placeholder="张三,HOUR-CODE-001&#10;李四,HOUR-CODE-002&#10;或纯兑换码：&#10;DAY-001&#10;DAY-002"></textarea>
-    <button class="btn btn-p" id="impBtn">导入</button>
-    <div class="msg" id="impMsg"></div>
-  </div>
+<div class="section"><h2>导入兑换码</h2>
+<select id="impType"><option value="dayCard">日卡</option><option value="coupon">优惠券</option><option value="weekCard">周卡</option></select>
+<div class="hint">一行一个。员工名格式：员工名,兑换码</div>
+<textarea id="impCodeList" placeholder="张三,CODE-001&#10;李四,CODE-002&#10;或纯兑换码&#10;DAY-001&#10;DAY-002"></textarea>
+<button class="btn btn-p" id="impBtn">导入</button><div class="msg" id="impMsg"></div>
 </div>
-
+</div>
 <div id="tab-codes" style="display:none">
-  <div class="section"><h2>查看码库</h2>
-    <div class="tab-bar" style="margin-bottom:16px;" id="codeTabBar">
-      <button class="on" onclick="viewCodes('dayCard')">日卡</button>
-      <button onclick="viewCodes('coupon')">优惠券</button>
-      <button onclick="viewCodes('hourCard')">小时卡</button>
-      <button onclick="viewCodes('weekCard')">周卡</button>
-    </div>
-    <div id="codeView"><div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);">选择类型查看</div></div>
-  </div>
+<div class="section"><h2>查看码库</h2>
+<div class="tab-bar" style="margin-bottom:16px;" id="codeTabBar">
+<button class="on" onclick="viewCodes('dayCard')">日卡</button>
+<button onclick="viewCodes('coupon')">优惠券</button>
+<button onclick="viewCodes('hourCard')">小时卡</button>
+<button onclick="viewCodes('weekCard')">周卡</button>
 </div>
-
+<div id="codeView"><div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);">选择类型查看</div></div>
+</div>
+</div>
 <div id="tab-settings" style="display:none">
-  <div class="section"><h2>飞书通知</h2>
-    <input type="text" id="setFeishuHook" placeholder="飞书 Webhook 地址">
-    <button class="btn btn-p" id="setFeishuBtn">保存</button>
-    <button class="btn btn-t" id="setFeishuTest">测试</button>
-    <div class="msg" id="setFeishuMsg"></div>
-  </div>
+<div class="section"><h2>小时卡固定码</h2>
+<div class="hint">所有人中小时卡获得同一个码</div>
+<input type="text" id="setHourCode" placeholder="设置固定兑换码">
+<button class="btn btn-p" id="setHourBtn">保存</button><div class="msg" id="setHourMsg"></div>
 </div>
-
+<div class="section"><h2>飞书通知</h2>
+<input type="text" id="setFeishuHook" placeholder="飞书 Webhook 地址">
+<button class="btn btn-p" id="setFeishuBtn">保存</button>
+<button class="btn btn-t" id="setFeishuTest">测试</button><div class="msg" id="setFeishuMsg"></div>
+</div>
+</div>
 <script>
 (function(){
-var ALLOWED=['coayo975.github.io','localhost','127.0.0.1'];
-var host=window.location.hostname, ok=false;
-for(var i=0;i<ALLOWED.length;i++){if(host.indexOf(ALLOWED[i])!==-1){ok=true;break;}}
-if(!ok){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;">页面仅限于官方渠道访问</div>';throw new Error('blocked');}
-
-var API_BASE = 'https://lottery-xv6g.onrender.com';
-
-function switchTab(t){
-  ['overview','import','codes','settings'].forEach(function(id){document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
-  document.querySelectorAll('.tab-bar button').forEach(function(b){b.className='';});
-  if(t==='overview')refreshOverview();
-  if(t==='codes')viewCodes('dayCard');
-  if(t==='settings')loadSettings();
-}
-
-function refreshOverview(){
-  fetch(API_BASE+'/api/stats').then(function(r){return r.json();}).then(function(s){
-    document.getElementById('ovDraws').textContent=s.totalDraws||0;
-    var td=(new Date()).toISOString().slice(0,10);
-    var todayD=(s.daily||{})[td]||{};
-    document.getElementById('ovToday').textContent=todayD.draws||0;
-    document.getElementById('ovDay').textContent=(s.codeBalance.dayCards||{}).available+'/'+(s.codeBalance.dayCards||{}).total;
-    document.getElementById('ovCoupon').textContent=(s.codeBalance.coupons||{}).available+'/'+(s.codeBalance.coupons||{}).total;
-    document.getElementById('ovHour').textContent=(s.codeBalance.hourCards||{}).available+'/'+(s.codeBalance.hourCards||{}).total;
-    document.getElementById('ovWeek').textContent=(s.codeBalance.weekCards||{}).available+'/'+(s.codeBalance.weekCards||{}).total;
-    var p=s.prizes||{};
-    document.getElementById('ovPDay').textContent=p.dayCard||0;
-    document.getElementById('ovPCoupon').textContent=p.coupon||0;
-    document.getElementById('ovPHour').textContent=p.hourCard||0;
-    document.getElementById('ovPWeek').textContent=p.weekCard||0;
-  }).catch(function(e){console.error(e);});
-}
-
-document.getElementById('impBtn').addEventListener('click',function(){
-  var type=document.getElementById('impType').value;
-  var raw=document.getElementById('impCodeList').value;
-  var list=raw.split(/[\n\r]+/).map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
-  if(!list.length){document.getElementById('impMsg').textContent='请输入兑换码';return;}
-  var hasNames=list[0].indexOf(',')>-1;
-  var endpoint=hasNames?'/api/codes/import-named':'/api/codes/import';
-  fetch(API_BASE+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:type,codes:list})})
-  .then(function(r){return r.json();}).then(function(d){
-    if(d.success){document.getElementById('impMsg').style.color='#00e676';document.getElementById('impMsg').textContent='导入 '+d.imported+' 个（跳过 '+d.skipped+' 重复），共 '+d.total+' 个';document.getElementById('impCodeList').value='';}
-    else{document.getElementById('impMsg').style.color='#ff5252';document.getElementById('impMsg').textContent=d.message||'导入失败';}
-  }).catch(function(){document.getElementById('impMsg').style.color='#ff5252';document.getElementById('impMsg').textContent='网络错误';});
-});
-
-function viewCodes(type){
-  var btns=document.querySelectorAll('#codeTabBar button');
-  var types=['dayCard','coupon','hourCard','weekCard'];
-  btns.forEach(function(b,i){b.className=types[i]===type?'on':'';});
-  document.getElementById('codeView').innerHTML='<div style="text-align:center;padding:30px;">加载中...</div>';
-  fetch(API_BASE+'/api/codes/list/'+type).then(function(r){return r.json();}).then(function(d){
-    var arr=d.codes||[];
-    var used=arr.filter(function(x){return x.used;}).length;
-    var avail=arr.length-used;
-    if(arr.length===0){document.getElementById('codeView').innerHTML='<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);">暂无兑换码</div>';return;}
-    var h='<div style="margin-bottom:12px;font-size:13px;color:rgba(255,255,255,0.5);">共 '+arr.length+' 个，可用 '+avail+' 个，已用 '+used+' 个</div>';
-    h+='<table><thead><tr><th>#</th><th>兑换码</th><th>员工</th><th>状态</th><th>使用时间</th></tr></thead><tbody>';
-    arr.forEach(function(item,i){
-      h+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;">'+item.code+'</td><td>'+(item.name||'-')+'</td><td><span class="badge '+(item.used?'used':'ok')+'">'+(item.used?'已使用':'可用')+'</span></td><td style="font-size:12px;color:rgba(255,255,255,0.35);">'+(item.usedAt?(new Date(item.usedAt)).toLocaleString('zh-CN'):'-')+'</td></tr>';
-    });
-    h+='</tbody></table>';
-    document.getElementById('codeView').innerHTML=h;
-  }).catch(function(){document.getElementById('codeView').innerHTML='<div style="text-align:center;padding:30px;color:#ff5252;">加载失败</div>';});
-}
-
-function loadSettings(){
-  fetch(API_BASE+'/api/config').then(function(r){return r.json();}).then(function(cfg){
-    document.getElementById('setFeishuHook').value=cfg.feishuWebhook||'';
-  }).catch(function(){});
-}
-
-document.getElementById('setFeishuBtn').addEventListener('click',function(){
-  var hook=document.getElementById('setFeishuHook').value.trim();
-  fetch(API_BASE+'/api/config/feishu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({webhook:hook})})
-  .then(function(r){return r.json();}).then(function(d){
-    document.getElementById('setFeishuMsg').style.color='#00e676';
-    document.getElementById('setFeishuMsg').textContent='已保存';
-  }).catch(function(){document.getElementById('setFeishuMsg').style.color='#ff5252';document.getElementById('setFeishuMsg').textContent='网络错误';});
-});
-
-document.getElementById('setFeishuTest').addEventListener('click',function(){
-  document.getElementById('setFeishuMsg').style.color='#ffd740';
-  document.getElementById('setFeishuMsg').textContent='发送中...';
-  fetch(API_BASE+'/api/feishu/report',{method:'POST'}).then(function(r){return r.json();}).then(function(d){
-    document.getElementById('setFeishuMsg').style.color=d.success?'#00e676':'#ff5252';
-    document.getElementById('setFeishuMsg').textContent=d.message;
-  }).catch(function(){document.getElementById('setFeishuMsg').style.color='#ff5252';document.getElementById('setFeishuMsg').textContent='网络错误';});
-});
-
-window.switchTab=switchTab;
-window.viewCodes=viewCodes;
-refreshOverview();
+var A=['coayo975.github.io','localhost','127.0.0.1'],h=window.location.hostname,ok=!1;
+for(var i=0;i<A.length;i++)if(h.indexOf(A[i])!==-1){ok=!0;break}
+if(!ok){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;">页面仅限于官方渠道访问</div>';throw new Error('blocked')}
+var B='https://lottery-xv6g.onrender.com';
+function switchTab(t){['overview','import','codes','settings'].forEach(function(x){document.getElementById('tab-'+x).style.display=x===t?'block':'none'});document.querySelectorAll('.tab-bar button').forEach(function(b){b.className=''});if(t==='overview')RF();if(t==='codes')VC('dayCard');if(t==='settings')LS()}
+function RF(){fetch(B+'/api/stats').then(function(r){return r.json()}).then(function(s){document.getElementById('ovDraws').textContent=s.totalDraws||0;var td=(new Date).toISOString().slice(0,10),todayD=(s.daily||{})[td]||{};document.getElementById('ovToday').textContent=todayD.draws||0;document.getElementById('ovDay').textContent=(s.codeBalance.dayCards||{}).available+'/'+(s.codeBalance.dayCards||{}).total;document.getElementById('ovCoupon').textContent=(s.codeBalance.coupons||{}).available+'/'+(s.codeBalance.coupons||{}).total;var hc=s.codeBalance.hourCards||{};document.getElementById('ovHour').textContent=hc.code?'已设置':'未设置';document.getElementById('ovWeek').textContent=(s.codeBalance.weekCards||{}).available+'/'+(s.codeBalance.weekCards||{}).total;var p=s.prizes||{};document.getElementById('ovPDay').textContent=p.dayCard||0;document.getElementById('ovPCoupon').textContent=p.coupon||0;document.getElementById('ovPHour').textContent=p.hourCard||0;document.getElementById('ovPWeek').textContent=p.weekCard||0})}
+document.getElementById('impBtn').addEventListener('click',function(){var t=document.getElementById('impType').value,raw=document.getElementById('impCodeList').value,list=raw.split(/[\n\r]+/).map(function(s){return s.trim()}).filter(function(s){return s.length>0});if(!list.length){document.getElementById('impMsg').textContent='请输入兑换码';return}var hn=list[0].indexOf(',')>-1,ep=hn?'/api/codes/import-named':'/api/codes/import';fetch(B+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:t,codes:list})}).then(function(r){return r.json()}).then(function(d){if(d.success){document.getElementById('impMsg').style.color='#00e676';document.getElementById('impMsg').textContent='导入 '+d.imported+' 个（跳过 '+d.skipped+' 重复），共 '+d.total+' 个';document.getElementById('impCodeList').value=''}else{document.getElementById('impMsg').style.color='#ff5252';document.getElementById('impMsg').textContent=d.message||'导入失败'}}).catch(function(){document.getElementById('impMsg').style.color='#ff5252';document.getElementById('impMsg').textContent='网络错误'})});
+function VC(type){var btns=document.querySelectorAll('#codeTabBar button'),types=['dayCard','coupon','hourCard','weekCard'];btns.forEach(function(b,i){b.className=types[i]===type?'on':''});document.getElementById('codeView').innerHTML='<div style="text-align:center;padding:30px;">加载中...</div>';if(type==='hourCard'){fetch(B+'/api/stats').then(function(r){return r.json()}).then(function(s){var hc=s.codeBalance.hourCards||{};document.getElementById('codeView').innerHTML='<div class="section"><table><tr><td style="color:rgba(255,255,255,0.5);">类型</td><td>固定码（所有人共用）</td></tr><tr><td style="color:rgba(255,255,255,0.5);">兑换码</td><td style="font-family:monospace;color:var(--cyan);">'+(hc.code||'未设置')+'</td></tr></table></div>'})}else{fetch(B+'/api/codes/list/'+type).then(function(r){return r.json()}).then(function(d){var arr=d.codes||[],used=arr.filter(function(x){return x.used}).length,avail=arr.length-used;if(arr.length===0){document.getElementById('codeView').innerHTML='<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);">暂无兑换码</div>';return}var h='<div style="margin-bottom:12px;font-size:13px;color:rgba(255,255,255,0.5);">共 '+arr.length+' 个，可用 '+avail+' 个，已用 '+used+' 个</div>';h+='<table><thead><tr><th>#</th><th>兑换码</th><th>员工</th><th>状态</th><th>使用时间</th></tr></thead><tbody>';arr.forEach(function(item,i){h+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;">'+item.code+'</td><td>'+(item.name||'-')+'</td><td><span class="badge '+(item.used?'used':'ok')+'">'+(item.used?'已使用':'可用')+'</span></td><td style="font-size:12px;color:rgba(255,255,255,0.35);">'+(item.usedAt?new Date(item.usedAt).toLocaleString('zh-CN'):'-')+'</td></tr>'});h+='</tbody></table>';document.getElementById('codeView').innerHTML=h})}}
+function LS(){fetch(B+'/api/config').then(function(r){return r.json()}).then(function(cfg){document.getElementById('setFeishuHook').value=cfg.feishuWebhook||''});fetch(B+'/api/stats').then(function(r){return r.json()}).then(function(s){var hc=s.codeBalance.hourCards||{};document.getElementById('setHourCode').value=hc.code||''})}
+document.getElementById('setHourBtn').addEventListener('click',function(){var c=document.getElementById('setHourCode').value.trim();if(!c){document.getElementById('setHourMsg').textContent='请输入兑换码';return}fetch(B+'/api/config/hourcard',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:c})}).then(function(r){return r.json()}).then(function(d){if(d.success){document.getElementById('setHourMsg').style.color='#00e676';document.getElementById('setHourMsg').textContent='已保存'}else{document.getElementById('setHourMsg').style.color='#ff5252';document.getElementById('setHourMsg').textContent=d.message}}).catch(function(){document.getElementById('setHourMsg').style.color='#ff5252';document.getElementById('setHourMsg').textContent='网络错误'})});
+document.getElementById('setFeishuBtn').addEventListener('click',function(){var hk=document.getElementById('setFeishuHook').value.trim();fetch(B+'/api/config/feishu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({webhook:hk})}).then(function(r){return r.json()}).then(function(d){document.getElementById('setFeishuMsg').style.color='#00e676';document.getElementById('setFeishuMsg').textContent='已保存'}).catch(function(){document.getElementById('setFeishuMsg').style.color='#ff5252';document.getElementById('setFeishuMsg').textContent='网络错误'})});
+document.getElementById('setFeishuTest').addEventListener('click',function(){document.getElementById('setFeishuMsg').style.color='#ffd740';document.getElementById('setFeishuMsg').textContent='发送中...';fetch(B+'/api/feishu/report',{method:'POST'}).then(function(r){return r.json()}).then(function(d){document.getElementById('setFeishuMsg').style.color=d.success?'#00e676':'#ff5252';document.getElementById('setFeishuMsg').textContent=d.message}).catch(function(){document.getElementById('setFeishuMsg').style.color='#ff5252';document.getElementById('setFeishuMsg').textContent='网络错误'})});
+window.switchTab=switchTab;window.viewCodes=VC;RF();
 })();
 </script>
-
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+</html>
