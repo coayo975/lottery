@@ -5,289 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>幸运转盘</title>
 <style>
-  :root {
-    --bg: #0a0a1a;
-    --cyan: #00f0ff;
-    --purple: #b400ff;
-    --pink: #ff2d95;
-    --gold: #ffd740;
-    --green: #00e676;
-    --text: #e0e0ff;
-  }
-
+  :root { --bg: #0a0a1a; --cyan: #00f0ff; --purple: #b400ff; --pink: #ff2d95; --gold: #ffd740; --green: #00e676; --text: #e0e0ff; }
   * { margin:0; padding:0; box-sizing:border-box; }
-
-  body {
-    background: var(--bg);
-    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background:
-      linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  #particles {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 12px;
-    max-width: 800px;
-    width: 100%;
-  }
-
-  .title {
-    font-size: clamp(28px, 7vw, 44px);
-    font-weight: 900;
-    letter-spacing: 4px;
-    text-align: center;
-  }
-  .title .glow {
-    background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 20px rgba(0,240,255,0.5));
-  }
-  .title .sub {
-    display: block;
-    font-size: 15px;
-    font-weight: 400;
-    letter-spacing: 10px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 4px;
-  }
-
-  .wheel-wrapper {
-    position: relative;
-    width: min(640px, 97vw);
-    height: min(640px, 97vw);
-  }
-  #wheelCanvas {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 0 30px rgba(0,240,255,0.2));
-    transition: filter 0.3s;
-  }
-  #wheelCanvas.spinning {
-    filter: drop-shadow(0 0 50px rgba(180,0,255,0.5));
-  }
-
-  .pointer {
-    position: absolute;
-    top: -22px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 32px solid transparent;
-    border-right: 32px solid transparent;
-    border-top: 56px solid var(--cyan);
-    filter: drop-shadow(0 0 12px rgba(0,240,255,0.8));
-    z-index: 2;
-  }
-
-  .legend {
-    display: flex;
-    justify-content: center;
-    gap: clamp(10px, 3vw, 20px);
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 20px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-  }
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-  }
-
-  .btn-spin {
-    position: relative;
-    padding: 18px 64px;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    color: #fff;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 0 30px rgba(180,0,255,0.4), 0 4px 15px rgba(0,0,0,0.5);
-    overflow: hidden;
-  }
-  .btn-spin::before {
-    content: '';
-    position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: rotate(45deg);
-    animation: shimmer 3s infinite;
-  }
-  .btn-spin:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 50px rgba(180,0,255,0.6), 0 6px 20px rgba(0,0,0,0.5);
-  }
-  .btn-spin:active { transform: translateY(0); }
-  .btn-spin:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-spin:disabled::before { display: none; }
-
-  @keyframes shimmer {
-    0% { transform: translateX(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) rotate(45deg); }
-  }
-
-  .stats-bar {
-    display: flex;
-    gap: 24px;
-    padding: 14px 28px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    font-size: 14px;
-    color: rgba(255,255,255,0.6);
-    backdrop-filter: blur(10px);
-  }
-  .stats-bar .val {
-    color: var(--cyan);
-    font-weight: 700;
-    font-size: 20px;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease;
-  }
-  .modal-overlay.hidden { display: none; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .modal-card {
-    background: linear-gradient(160deg, #151530, #1a1a3e);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    padding: 32px 28px;
-    text-align: center;
-    max-width: 380px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,240,255,0.1);
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-  .modal-card .prize-icon { font-size: 64px; margin-bottom: 12px; animation: pulse 1s ease infinite; }
-  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-  .modal-card .prize-name { font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 8px; }
-  .modal-card .prize-name.dayCard  { color: #ff9100; }
-  .modal-card .prize-name.coupon   { color: var(--green); }
-  .modal-card .prize-name.hourCard { color: var(--purple); }
-  .modal-card .prize-name.weekCard { color: var(--gold); }
-
-  .modal-card .prize-code {
-    display: inline-block;
-    margin: 12px 0;
-    padding: 10px 24px;
-    background: rgba(255,255,255,0.06);
-    border: 1px dashed rgba(255,255,255,0.2);
-    border-radius: 12px;
-    font-family: 'Courier New', monospace;
-    font-size: 18px;
-    letter-spacing: 3px;
-    color: var(--cyan);
-    word-break: break-all;
-  }
-  .modal-card .prize-msg { color: rgba(255,255,255,0.6); font-size: 14px; margin: 8px 0 20px; line-height: 1.6; }
-  .modal-card .btn-close {
-    padding: 12px 40px;
-    background: linear-gradient(135deg, var(--cyan), var(--purple));
-    border: none;
-    border-radius: 50px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 0 20px rgba(0,240,255,0.3);
-  }
-  .modal-card .btn-close:hover { box-shadow: 0 0 30px rgba(0,240,255,0.5); transform: translateY(-2px); }
-  .modal-card .download-hint { display: block; margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.3); }
-
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
-    background: rgba(255,45,149,0.9);
-    color: #fff;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 200;
-    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
-    box-shadow: 0 4px 20px rgba(255,45,149,0.4);
-  }
-  @keyframes toastIn { from { transform: translateX(-50%) translateY(20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
-  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
-
-  @media (max-width: 500px) {
-    .container { padding: 8px; gap: 14px; }
-    .wheel-wrapper { width: min(380px, 96vw); height: min(380px, 96vw); }
-    .stats-bar { gap: 14px; padding: 10px 14px; font-size: 12px; }
-    .stats-bar .val { font-size: 16px; }
-    .btn-spin { padding: 14px 44px; font-size: 18px; }
-    .modal-card { padding: 24px 18px; }
-    .modal-card .prize-icon { font-size: 48px; }
-    .modal-card .prize-name { font-size: 22px; }
-    .pointer { border-left-width: 22px; border-right-width: 22px; border-top-width: 36px; top: -14px; }
-  }
-  @media (max-width: 380px) {
-    .wheel-wrapper { width: min(300px, 95vw); height: min(300px, 95vw); }
+  body { background:var(--bg); font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; color:var(--text); min-height:100vh; overflow-x:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
+  body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(rgba(0,240,255,0.02) 1px, transparent 1px),linear-gradient(90deg, rgba(0,240,255,0.02) 1px, transparent 1px); background-size:40px 40px; z-index:0; pointer-events:none; }
+  #particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .container { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:20px; padding:12px; max-width:800px; width:100%; }
+  .title { font-size:clamp(28px,7vw,44px); font-weight:900; letter-spacing:4px; text-align:center; }
+  .title .glow { background:linear-gradient(135deg,var(--cyan),var(--purple),var(--pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 0 20px rgba(0,240,255,0.5)); }
+  .title .sub { display:block; font-size:15px; font-weight:400; letter-spacing:10px; color:rgba(255,255,255,0.4); margin-top:4px; }
+  .wheel-wrapper { position:relative; width:min(640px,97vw); height:min(640px,97vw); }
+  #wheelCanvas { width:100%; height:100%; filter:drop-shadow(0 0 30px rgba(0,240,255,0.2)); transition:filter 0.3s; }
+  #wheelCanvas.spinning { filter:drop-shadow(0 0 50px rgba(180,0,255,0.5)); }
+  .pointer { position:absolute; top:-22px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:32px solid transparent; border-right:32px solid transparent; border-top:56px solid var(--cyan); filter:drop-shadow(0 0 12px rgba(0,240,255,0.8)); z-index:2; }
+  .legend { display:flex; justify-content:center; gap:clamp(10px,3vw,20px); flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:6px; padding:6px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:20px; font-size:13px; color:rgba(255,255,255,0.7); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; }
+  .btn-spin { position:relative; padding:18px 64px; font-size:22px; font-weight:800; letter-spacing:3px; color:#fff; background:linear-gradient(135deg,var(--purple),var(--pink)); border:none; border-radius:50px; cursor:pointer; transition:all 0.3s; box-shadow:0 0 30px rgba(180,0,255,0.4),0 4px 15px rgba(0,0,0,0.5); overflow:hidden; }
+  .btn-spin::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg,transparent,rgba(255,255,255,0.1),transparent); transform:rotate(45deg); animation:shimmer 3s infinite; }
+  .btn-spin:hover { transform:translateY(-2px); box-shadow:0 0 50px rgba(180,0,255,0.6),0 6px 20px rgba(0,0,0,0.5); }
+  .btn-spin:active { transform:translateY(0); }
+  .btn-spin:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-spin:disabled::before { display:none; }
+  @keyframes shimmer { 0%{transform:translateX(-100%) rotate(45deg)} 100%{transform:translateX(100%) rotate(45deg)} }
+  .stats-bar { display:flex; gap:24px; padding:14px 28px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; font-size:14px; color:rgba(255,255,255,0.6); backdrop-filter:blur(10px); }
+  .stats-bar .val { color:var(--cyan); font-weight:700; font-size:20px; }
+  .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; }
+  .modal-overlay.hidden { display:none; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal-card { background:linear-gradient(160deg,#151530,#1a1a3e); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:32px 28px; text-align:center; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(0,240,255,0.1); animation:slideUp 0.4s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-card .prize-icon { font-size:64px; margin-bottom:12px; animation:pulse 1s ease infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+  .modal-card .prize-name { font-size:28px; font-weight:900; letter-spacing:2px; margin-bottom:8px; }
+  .modal-card .prize-name.dayCard{color:#ff9100} .modal-card .prize-name.coupon{color:var(--green)} .modal-card .prize-name.hourCard{color:var(--purple)} .modal-card .prize-name.weekCard{color:var(--gold)}
+  .modal-card .prize-code { display:inline-block; margin:12px 0; padding:10px 24px; background:rgba(255,255,255,0.06); border:1px dashed rgba(255,255,255,0.2); border-radius:12px; font-family:'Courier New',monospace; font-size:18px; letter-spacing:3px; color:var(--cyan); word-break:break-all; }
+  .modal-card .prize-msg { color:rgba(255,255,255,0.6); font-size:14px; margin:8px 0 20px; line-height:1.6; }
+  .modal-card .btn-close { padding:12px 40px; background:linear-gradient(135deg,var(--cyan),var(--purple)); border:none; border-radius:50px; color:#fff; font-size:16px; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.3s; box-shadow:0 0 20px rgba(0,240,255,0.3); }
+  .modal-card .btn-close:hover { box-shadow:0 0 30px rgba(0,240,255,0.5); transform:translateY(-2px); }
+  .modal-card .download-hint { display:block; margin-top:12px; font-size:12px; color:rgba(255,255,255,0.3); }
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); padding:12px 24px; background:rgba(255,45,149,0.9); color:#fff; border-radius:50px; font-size:14px; font-weight:600; z-index:200; animation:toastIn 0.3s ease,toastOut 0.3s ease 2.5s forwards; box-shadow:0 4px 20px rgba(255,45,149,0.4); }
+  @keyframes toastIn { from{transform:translateX(-50%) translateY(20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+  @keyframes toastOut { from{opacity:1} to{opacity:0} }
+  @media (max-width:500px) {
+    .container { padding:8px; gap:14px; }
+    .wheel-wrapper { width:min(380px,96vw); height:min(380px,96vw); }
+    .stats-bar { gap:14px; padding:10px 14px; font-size:12px; }
+    .stats-bar .val { font-size:16px; }
+    .btn-spin { padding:14px 44px; font-size:18px; }
+    .modal-card { padding:24px 18px; }
+    .modal-card .prize-icon { font-size:48px; }
+    .modal-card .prize-name { font-size:22px; }
+    .pointer { border-left-width:22px; border-right-width:22px; border-top-width:36px; top:-14px; }
   }
 </style>
 </head>
@@ -296,38 +65,23 @@
 <canvas id="particles"></canvas>
 
 <div class="container">
-  <div class="title">
-    <span class="glow">幸运转盘</span>
-    <span class="sub">LUCKY SPIN</span>
-  </div>
-
-  <div class="wheel-wrapper">
-    <div class="pointer"></div>
-    <canvas id="wheelCanvas" width="1200" height="1200"></canvas>
-  </div>
-
+  <div class="title"><span class="glow">幸运转盘</span><span class="sub">LUCKY SPIN</span></div>
+  <div class="wheel-wrapper"><div class="pointer"></div><canvas id="wheelCanvas" width="1200" height="1200"></canvas></div>
   <div class="legend">
     <div class="legend-item"><span class="legend-dot" style="background:#ff9100;"></span> 日卡</div>
     <div class="legend-item"><span class="legend-dot" style="background:#00e676;"></span> 优惠券</div>
     <div class="legend-item"><span class="legend-dot" style="background:#b388ff;"></span> 小时卡</div>
     <div class="legend-item"><span class="legend-dot" style="background:#ffd740;"></span> 周卡</div>
   </div>
-
   <button class="btn-spin" id="btnSpin">开始抽奖</button>
-
-  <div class="stats-bar">
-    <span>本机抽奖 <span class="val" id="statDraws">0</span> 次</span>
-  </div>
+  <div class="stats-bar"><span>本机抽奖 <span class="val" id="statDraws">0</span> 次</span><span>今日剩余 <span class="val" id="statRemain">5</span> 次</span></div>
 </div>
 
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal-card">
     <div class="prize-icon" id="prizeIcon"></div>
     <div class="prize-name" id="prizeName"></div>
-    <div class="prize-code hidden" id="prizeCodeWrap">
-      <span style="font-size:13px;color:rgba(255,255,255,0.5);">兑换码</span>
-      <div class="prize-code" id="prizeCode"></div>
-    </div>
+    <div class="prize-code hidden" id="prizeCodeWrap"><span style="font-size:13px;color:rgba(255,255,255,0.5);">兑换码</span><div class="prize-code" id="prizeCode"></div></div>
     <div class="prize-msg" id="prizeMsg"></div>
     <button class="btn-close" id="btnCloseModal">再来一次</button>
     <span class="download-hint" id="downloadHint"></span>
@@ -335,381 +89,160 @@
 </div>
 
 <script>
-(function() {
-// ═══ 防护层 ═══
-// 1. 域名锁：只在官方域名运行
-var ALLOWED = ['coayo975.github.io', 'localhost', '127.0.0.1'];
-var host = window.location.hostname;
-var ok = false;
-for (var i = 0; i < ALLOWED.length; i++) {
-  if (host.indexOf(ALLOWED[i]) !== -1) { ok = true; break; }
-}
-if (!ok) {
-  document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:80px 20px;font-size:18px;">页面仅限于官方渠道访问</div>';
-  throw new Error('blocked');
-}
+(function(){
+var ALLOWED=['coayo975.github.io','localhost','127.0.0.1'];
+var host=window.location.hostname, ok=false;
+for(var i=0;i<ALLOWED.length;i++){if(host.indexOf(ALLOWED[i])!==-1){ok=true;break;}}
+if(!ok){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;font-size:18px;">页面仅限于官方渠道访问</div>';throw new Error('blocked');}
 
-// 2. 下载链接混淆（XOR编码，防止直接修改）
-var _k = [104,116,116,112,115,58,47,47,120,109,111,100,45,115,116,97,116,105,99,46,120,104,117,98,112,108,97,121,46,99,111,109,47,117,112,108,111,97,100,47,50,48,50,53,49,50,49,54,49,55,51,56,51,50,47,97,112,112,95,118,101,114,115,105,111,110,47,120,109,111,100,104,117,98,73,110,115,116,97,108,108,101,114,95,95,50,48,50,53,49,50,49,53,95,49,55,51,55,52,52,95,99,104,97,110,110,101,108,49,48,48,54,53,46,101,120,101];
-function _d() { var s=''; for(var i=0;i<_k.length;i++) s+=String.fromCharCode(_k[i]); return s; }
-var DOWNLOAD_URL = _d();
+var _k=[104,116,116,112,115,58,47,47,120,109,111,100,45,115,116,97,116,105,99,46,120,104,117,98,112,108,97,121,46,99,111,109,47,117,112,108,111,97,100,47,50,48,50,53,49,50,49,54,49,55,51,56,51,50,47,97,112,112,95,118,101,114,115,105,111,110,47,120,109,111,100,104,117,98,73,110,115,116,97,108,108,101,114,95,95,50,48,50,53,49,50,49,53,95,49,55,51,55,52,52,95,99,104,97,110,110,101,108,49,48,48,54,53,46,101,120,101];
+function _d(){var s='';for(var i=0;i<_k.length;i++)s+=String.fromCharCode(_k[i]);return s;}
+var DL=_d();
 
-// 3. 反调试
-setInterval(function() {
-  var start = performance.now();
-  debugger;
-  var end = performance.now();
-  if (end - start > 100) {
-    document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:80px 20px;">检测到调试工具</div>';
-    throw new Error('debug');
+setInterval(function(){var s=performance.now();debugger;var e=performance.now();if(e-s>100){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;">检测到调试工具</div>';throw new Error('debug');}},3000);
+
+var P={dayCard:{name:'日卡',color:'#ff9100',icon:'☀️'},coupon:{name:'优惠券',color:'#00e676',icon:'🎫'},hourCard:{name:'小时卡',color:'#b388ff',icon:'⏰'},weekCard:{name:'周卡',color:'#ffd740',icon:'📅'}};
+var S=['dayCard','coupon','hourCard','coupon','dayCard','coupon','hourCard','coupon','hourCard','coupon','hourCard','coupon','hourCard','coupon','hourCard','weekCard','dayCard','coupon','hourCard','weekCard'];
+var SN=S.length, SA=(2*Math.PI)/SN;
+var DP=[];
+for(var i=0;i<15;i++)DP.push('dayCard');
+for(var i=0;i<37;i++)DP.push('coupon');
+for(var i=0;i<40;i++)DP.push('hourCard');
+for(var i=0;i<8;i++)DP.push('weekCard');
+
+var wa=0,spinning=false;
+var wc=document.getElementById('wheelCanvas'),ctx=wc.getContext('2d');
+var btn=document.getElementById('btnSpin'),mo=document.getElementById('modalOverlay');
+
+var sc=document.getElementById('particles'),sctx=sc.getContext('2d');
+var meteors=[],stars=[];
+function rs(){sc.width=window.innerWidth;sc.height=window.innerHeight;}rs();window.addEventListener('resize',rs);
+function Star(){this.x=Math.random()*sc.width;this.y=Math.random()*sc.height;this.r=Math.random()*0.8+0.2;this.b=Math.random()*0.5+0.3;this.ts=Math.random()*0.02+0.005;this.to=Math.random()*Math.PI*2;}
+Star.prototype.draw=function(f){var a=this.b+Math.sin(f*this.ts+this.to)*0.2;sctx.beginPath();sctx.arc(this.x,this.y,this.r,0,Math.PI*2);sctx.fillStyle='rgba(180,220,255,'+Math.max(0.1,a)+')';sctx.fill();};
+function Meteor(){this.reset(true);}
+Meteor.prototype.reset=function(init){var e=Math.random();if(e<0.4){this.x=Math.random()*sc.width*0.6;this.y=-20;}else if(e<0.8){this.x=-20;this.y=Math.random()*sc.height*0.3;}else{this.x=Math.random()*sc.width;this.y=-20;}this.length=Math.random()*80+50;this.sx=Math.random()*4+4;this.sy=Math.random()*2.5+1.5;this.hs=Math.random()*1.5+0.8;this.op=Math.random()*0.7+0.3;var cs=[[255,255,255],[200,240,255],[0,240,255],[180,130,255],[200,180,255]];this.c=cs[Math.floor(Math.random()*cs.length)];if(init){this.x=Math.random()*sc.width;this.y=Math.random()*sc.height*0.7;}};
+Meteor.prototype.update=function(){this.x+=this.sx;this.y+=this.sy;if(this.y>sc.height+100||this.x>sc.width+100)this.reset(false);};
+Meteor.prototype.draw=function(){var r=this.sx/(this.sx+this.sy);var dx=-r*this.length,dy=-(1-r)*this.length;var tx=this.x-dx*0.15,ty=this.y-dy*0.15;var hx=this.x+dx*0.85,hy=this.y+dy*0.85;var cr=this.c[0],cg=this.c[1],cb=this.c[2];var g=sctx.createLinearGradient(tx,ty,hx,hy);g.addColorStop(0,'rgba('+cr+','+cg+','+cb+',0)');g.addColorStop(0.6,'rgba('+cr+','+cg+','+cb+','+(this.op*0.4)+')');g.addColorStop(1,'rgba('+cr+','+cg+','+cb+','+this.op+')');sctx.beginPath();sctx.moveTo(tx,ty);sctx.lineTo(hx,hy);sctx.strokeStyle=g;sctx.lineWidth=this.hs*2;sctx.lineCap='round';sctx.stroke();sctx.beginPath();sctx.arc(hx,hy,this.hs,0,Math.PI*2);sctx.fillStyle='rgba('+cr+','+cg+','+cb+','+Math.min(1,this.op+0.3)+')';sctx.fill();sctx.beginPath();sctx.arc(hx,hy,this.hs*2.5,0,Math.PI*2);sctx.fillStyle='rgba('+cr+','+cg+','+cb+','+(this.op*0.15)+')';sctx.fill();};
+for(var i=0;i<120;i++)stars.push(new Star());
+for(var i=0;i<8+Math.floor(Math.random()*5);i++)meteors.push(new Meteor());
+var fc=0;
+function aSky(){sctx.clearRect(0,0,sc.width,sc.height);fc++;for(var i=0;i<stars.length;i++)stars[i].draw(fc);for(var i=0;i<meteors.length;i++){meteors[i].update();meteors[i].draw();}if(Math.random()<0.015&&meteors.length<15)meteors.push(new Meteor());meteors=meteors.filter(function(m){return m.y<sc.height+200&&m.x<sc.width+200;});while(meteors.length<6)meteors.push(new Meteor());requestAnimationFrame(aSky);}aSky();
+
+var CX=600,CY=600,R=560;
+function dw(a){
+  ctx.clearRect(0,0,1200,1200);
+  ctx.save();ctx.beginPath();ctx.arc(CX,CY,R+30,0,Math.PI*2);var rg=ctx.createRadialGradient(CX,CY,R-10,CX,CY,R+35);rg.addColorStop(0,'rgba(0,240,255,0)');rg.addColorStop(0.5,'rgba(0,240,255,0.08)');rg.addColorStop(1,'rgba(180,0,255,0.15)');ctx.fillStyle=rg;ctx.fill();ctx.restore();
+  for(var i=0;i<SN;i++){
+    var sa=a+i*SA-Math.PI/2,ea=sa+SA,pr=P[S[i]];
+    ctx.beginPath();ctx.moveTo(CX,CY);ctx.arc(CX,CY,R,sa,ea);ctx.closePath();
+    var g=ctx.createRadialGradient(CX,CY,R*0.3,CX,CY,R);g.addColorStop(0,'rgba(10,10,26,0.8)');g.addColorStop(0.6,pr.color+'55');g.addColorStop(1,pr.color+'aa');ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();var ma=sa+SA/2,tr=R*0.7,tx=CX+Math.cos(ma)*tr,ty=CY+Math.sin(ma)*tr;ctx.translate(tx,ty);ctx.rotate(ma+Math.PI/2);ctx.fillStyle='#fff';ctx.font='bold 24px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(pr.name,0,0);ctx.fillText(pr.name,0,0);ctx.restore();
   }
-}, 3000);
-
-// ═══ 主逻辑 ═══
-var PRIZES = {
-  dayCard: { name: '日卡', color: '#ff9100', icon: '☀️' },
-  coupon:  { name: '优惠券', color: '#00e676', icon: '🎫' },
-  hourCard:{ name: '小时卡', color: '#b388ff', icon: '⏰' },
-  weekCard:{ name: '周卡', color: '#ffd740', icon: '📅' }
-};
-
-var SEGMENTS = [
-  'dayCard','coupon','hourCard','coupon','dayCard',
-  'coupon','hourCard','coupon','hourCard','coupon',
-  'hourCard','coupon','hourCard','coupon','hourCard',
-  'weekCard','dayCard','coupon','hourCard','weekCard'
-];
-var SEG_COUNT = SEGMENTS.length;
-var SEG_ANGLE = (2 * Math.PI) / SEG_COUNT;
-
-var DRAW_POOL = [];
-for (var i = 0; i < 15; i++) DRAW_POOL.push('dayCard');
-for (var i = 0; i < 37; i++) DRAW_POOL.push('coupon');
-for (var i = 0; i < 40; i++) DRAW_POOL.push('hourCard');
-for (var i = 0; i < 8;  i++) DRAW_POOL.push('weekCard');
-
-var wheelAngle = 0;
-var isSpinning = false;
-
-var wheelCanvas = document.getElementById('wheelCanvas');
-var ctx = wheelCanvas.getContext('2d');
-var btnSpin = document.getElementById('btnSpin');
-var modalOverlay = document.getElementById('modalOverlay');
-
-// ═══ 流星雨背景 ═══
-var skyCanvas = document.getElementById('particles');
-var skyCtx = skyCanvas.getContext('2d');
-var meteors = [];
-var stars = [];
-
-function resizeSky() {
-  skyCanvas.width = window.innerWidth;
-  skyCanvas.height = window.innerHeight;
-}
-resizeSky();
-window.addEventListener('resize', resizeSky);
-
-var Star = function() {
-  this.x = Math.random() * skyCanvas.width;
-  this.y = Math.random() * skyCanvas.height;
-  this.r = Math.random() * 0.8 + 0.2;
-  this.brightness = Math.random() * 0.5 + 0.3;
-  this.twinkleSpeed = Math.random() * 0.02 + 0.005;
-  this.twinkleOffset = Math.random() * Math.PI * 2;
-};
-Star.prototype.draw = function(frame) {
-  var alpha = this.brightness + Math.sin(frame * this.twinkleSpeed + this.twinkleOffset) * 0.2;
-  skyCtx.beginPath();
-  skyCtx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-  skyCtx.fillStyle = 'rgba(180,220,255,' + Math.max(0.1, alpha) + ')';
-  skyCtx.fill();
-};
-
-var Meteor = function() {
-  this.reset(true);
-};
-Meteor.prototype.reset = function(initial) {
-  var edge = Math.random();
-  if (edge < 0.4) { this.x = Math.random() * skyCanvas.width * 0.6; this.y = -20; }
-  else if (edge < 0.8) { this.x = -20; this.y = Math.random() * skyCanvas.height * 0.3; }
-  else { this.x = Math.random() * skyCanvas.width; this.y = -20; }
-  this.length = Math.random() * 80 + 50;
-  this.speedX = Math.random() * 4 + 4;
-  this.speedY = Math.random() * 2.5 + 1.5;
-  this.headSize = Math.random() * 1.5 + 0.8;
-  this.opacity = Math.random() * 0.7 + 0.3;
-  var colors = [[255,255,255],[200,240,255],[0,240,255],[180,130,255],[200,180,255]];
-  this.color = colors[Math.floor(Math.random() * colors.length)];
-  if (initial) {
-    this.x = Math.random() * skyCanvas.width;
-    this.y = Math.random() * skyCanvas.height * 0.7;
-  }
-};
-Meteor.prototype.update = function() {
-  this.x += this.speedX;
-  this.y += this.speedY;
-  if (this.y > skyCanvas.height + 100 || this.x > skyCanvas.width + 100) this.reset(false);
-};
-Meteor.prototype.draw = function() {
-  var ratio = this.speedX / (this.speedX + this.speedY);
-  var dx = -ratio * this.length;
-  var dy = -(1 - ratio) * this.length;
-  var tailX = this.x - dx * 0.15;
-  var tailY = this.y - dy * 0.15;
-  var headX = this.x + dx * 0.85;
-  var headY = this.y + dy * 0.85;
-  var r = this.color[0], g = this.color[1], b = this.color[2];
-  var grad = skyCtx.createLinearGradient(tailX, tailY, headX, headY);
-  grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',0)');
-  grad.addColorStop(0.6, 'rgba(' + r + ',' + g + ',' + b + ',' + (this.opacity * 0.4) + ')');
-  grad.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',' + this.opacity + ')');
-  skyCtx.beginPath();
-  skyCtx.moveTo(tailX, tailY);
-  skyCtx.lineTo(headX, headY);
-  skyCtx.strokeStyle = grad;
-  skyCtx.lineWidth = this.headSize * 2;
-  skyCtx.lineCap = 'round';
-  skyCtx.stroke();
-  skyCtx.beginPath();
-  skyCtx.arc(headX, headY, this.headSize, 0, Math.PI * 2);
-  skyCtx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + Math.min(1, this.opacity + 0.3) + ')';
-  skyCtx.fill();
-  skyCtx.beginPath();
-  skyCtx.arc(headX, headY, this.headSize * 2.5, 0, Math.PI * 2);
-  skyCtx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (this.opacity * 0.15) + ')';
-  skyCtx.fill();
-};
-
-for (var i = 0; i < 120; i++) stars.push(new Star());
-var meteorCount = 8 + Math.floor(Math.random() * 5);
-for (var i = 0; i < meteorCount; i++) meteors.push(new Meteor());
-
-var frameCount = 0;
-function animateSky() {
-  skyCtx.clearRect(0, 0, skyCanvas.width, skyCanvas.height);
-  frameCount++;
-  for (var i = 0; i < stars.length; i++) stars[i].draw(frameCount);
-  for (var i = 0; i < meteors.length; i++) { meteors[i].update(); meteors[i].draw(); }
-  if (Math.random() < 0.015 && meteors.length < 15) meteors.push(new Meteor());
-  meteors = meteors.filter(function(m) { return m.y < skyCanvas.height + 200 && m.x < skyCanvas.width + 200; });
-  while (meteors.length < 6) meteors.push(new Meteor());
-  requestAnimationFrame(animateSky);
-}
-animateSky();
-
-// ═══ 转盘绘制 ═══
-var CX = 600, CY = 600, R = 560;
-
-function drawWheel(angle) {
-  ctx.clearRect(0, 0, 1200, 1200);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(CX, CY, R + 30, 0, Math.PI * 2);
-  var ringGrad = ctx.createRadialGradient(CX, CY, R - 10, CX, CY, R + 35);
-  ringGrad.addColorStop(0, 'rgba(0,240,255,0)');
-  ringGrad.addColorStop(0.5, 'rgba(0,240,255,0.08)');
-  ringGrad.addColorStop(1, 'rgba(180,0,255,0.15)');
-  ctx.fillStyle = ringGrad;
-  ctx.fill();
-  ctx.restore();
-
-  for (var i = 0; i < SEG_COUNT; i++) {
-    var startAngle = angle + i * SEG_ANGLE - Math.PI / 2;
-    var endAngle = startAngle + SEG_ANGLE;
-    var prize = PRIZES[SEGMENTS[i]];
-    ctx.beginPath();
-    ctx.moveTo(CX, CY);
-    ctx.arc(CX, CY, R, startAngle, endAngle);
-    ctx.closePath();
-    var grad = ctx.createRadialGradient(CX, CY, R * 0.3, CX, CY, R);
-    grad.addColorStop(0, 'rgba(10,10,26,0.8)');
-    grad.addColorStop(0.6, prize.color + '55');
-    grad.addColorStop(1, prize.color + 'aa');
-    ctx.fillStyle = grad;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.save();
-    var midAngle = startAngle + SEG_ANGLE / 2;
-    var textR = R * 0.7;
-    var tx = CX + Math.cos(midAngle) * textR;
-    var ty = CY + Math.sin(midAngle) * textR;
-    ctx.translate(tx, ty);
-    ctx.rotate(midAngle + Math.PI / 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 3;
-    ctx.strokeText(prize.name, 0, 0);
-    ctx.fillText(prize.name, 0, 0);
-    ctx.restore();
-  }
-
-  var innerR = 72;
-  var innerGrad = ctx.createRadialGradient(CX, CY, 0, CX, CY, innerR);
-  innerGrad.addColorStop(0, '#1a1a3e');
-  innerGrad.addColorStop(0.7, '#0f0f2e');
-  innerGrad.addColorStop(1, '#0a0a1a');
-  ctx.beginPath();
-  ctx.arc(CX, CY, innerR, 0, Math.PI * 2);
-  ctx.fillStyle = innerGrad;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,240,255,0.3)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 40px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 4;
-  ctx.strokeText('GO', CX, CY);
-  ctx.fillText('GO', CX, CY);
-
-  for (var i = 0; i < 40; i++) {
-    var a = angle + (i / 40) * Math.PI * 2 - Math.PI / 2;
-    var x1 = CX + Math.cos(a) * (R + 8);
-    var y1 = CY + Math.sin(a) * (R + 8);
-    var x2 = CX + Math.cos(a) * (R + 22);
-    var y2 = CY + Math.sin(a) * (R + 22);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = i % 2 === 0 ? 'rgba(0,240,255,0.5)' : 'rgba(180,0,255,0.3)';
-    ctx.lineWidth = i % 2 === 0 ? 3.5 : 2;
-    ctx.stroke();
-  }
-
-  var dotCount = 12;
-  for (var i = 0; i < dotCount; i++) {
-    var a = angle + (i / dotCount) * Math.PI * 2 - Math.PI / 2;
-    var dx = CX + Math.cos(a) * (R + 38);
-    var dy = CY + Math.sin(a) * (R + 38);
-    ctx.beginPath();
-    ctx.arc(dx, dy, 5, 0, Math.PI * 2);
-    ctx.fillStyle = i % 3 === 0 ? 'rgba(0,240,255,0.8)' : 'rgba(180,0,255,0.6)';
-    ctx.fill();
-  }
+  var ir=72,ig=ctx.createRadialGradient(CX,CY,0,CX,CY,ir);ig.addColorStop(0,'#1a1a3e');ig.addColorStop(0.7,'#0f0f2e');ig.addColorStop(1,'#0a0a1a');ctx.beginPath();ctx.arc(CX,CY,ir,0,Math.PI*2);ctx.fillStyle=ig;ctx.fill();ctx.strokeStyle='rgba(0,240,255,0.3)';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 40px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.strokeStyle='#000';ctx.lineWidth=4;ctx.strokeText('GO',CX,CY);ctx.fillText('GO',CX,CY);
+  for(var i=0;i<40;i++){var aa=a+(i/40)*Math.PI*2-Math.PI/2,x1=CX+Math.cos(aa)*(R+8),y1=CY+Math.sin(aa)*(R+8),x2=CX+Math.cos(aa)*(R+22),y2=CY+Math.sin(aa)*(R+22);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=i%2===0?'rgba(0,240,255,0.5)':'rgba(180,0,255,0.3)';ctx.lineWidth=i%2===0?3.5:2;ctx.stroke();}
+  for(var i=0;i<12;i++){var aa=a+(i/12)*Math.PI*2-Math.PI/2,dx=CX+Math.cos(aa)*(R+38),dy=CY+Math.sin(aa)*(R+38);ctx.beginPath();ctx.arc(dx,dy,5,0,Math.PI*2);ctx.fillStyle=i%3===0?'rgba(0,240,255,0.8)':'rgba(180,0,255,0.6)';ctx.fill();}
 }
 
-// ═══ 旋转动画 ═══
-function spinToTarget(targetType, callback) {
-  var targetIndices = [];
-  for (var i = 0; i < SEGMENTS.length; i++) {
-    if (SEGMENTS[i] === targetType) targetIndices.push(i);
-  }
-  var targetIdx = targetIndices[Math.floor(Math.random() * targetIndices.length)];
-  var offsetInSeg = (Math.random() - 0.5) * SEG_ANGLE * 0.6;
-  var targetMidAngle = targetIdx * SEG_ANGLE + SEG_ANGLE / 2 + offsetInSeg;
-  var fullSpins = (5 + Math.floor(Math.random() * 3)) * Math.PI * 2;
-  var currentNorm = ((wheelAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-  var delta = targetMidAngle - currentNorm;
-  if (delta < 0) delta += Math.PI * 2;
-  var targetAngle = wheelAngle + fullSpins + delta;
-  var startAngle = wheelAngle;
-  var totalDelta = targetAngle - startAngle;
-  var duration = 4500 + Math.random() * 1500;
-  var startTime = performance.now();
-
-  function animate(now) {
-    var elapsed = now - startTime;
-    var progress = Math.min(elapsed / duration, 1);
-    var eased = 1 - Math.pow(1 - progress, 3);
-    wheelAngle = startAngle + totalDelta * eased;
-    drawWheel(wheelAngle);
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      wheelAngle = targetAngle;
-      drawWheel(wheelAngle);
-      isSpinning = false;
-      btnSpin.disabled = false;
-      wheelCanvas.classList.remove('spinning');
-      if (callback) callback();
-    }
-  }
-  requestAnimationFrame(animate);
+function stt(type,cb){
+  var ti=[];for(var i=0;i<S.length;i++){if(S[i]===type)ti.push(i);}
+  var ti2=ti[Math.floor(Math.random()*ti.length)],off=(Math.random()-0.5)*SA*0.6,tma=ti2*SA+SA/2+off;
+  var fs=(5+Math.floor(Math.random()*3))*Math.PI*2,cn=((wa%(Math.PI*2))+Math.PI*2)%(Math.PI*2),d=tma-cn;if(d<0)d+=Math.PI*2;
+  var ta=wa+fs+d,sa2=wa,td=ta-sa2,dur=4500+Math.random()*1500,st=performance.now();
+  function an(n){
+    var el=n-st,prg=Math.min(el/dur,1),eased=1-Math.pow(1-prg,3);wa=sa2+td*eased;dw(wa);
+    if(prg<1){requestAnimationFrame(an);}else{wa=ta;dw(wa);spinning=false;btn.disabled=false;wc.classList.remove('spinning');if(cb)cb();}
+  }requestAnimationFrame(an);
 }
 
-// ═══ 本地统计 ═══
-function getLocalStats() {
-  try { return JSON.parse(localStorage.getItem('lottery_stats')) || { draws: 0 }; }
-  catch(e) { return { draws: 0 }; }
-}
-function updateLocalStats() {
-  var s = getLocalStats();
-  s.draws = (s.draws || 0) + 1;
-  localStorage.setItem('lottery_stats', JSON.stringify(s));
-  document.getElementById('statDraws').textContent = s.draws;
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function ss(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function gs(){return ls('lottery_stats',{draws:0,prizes:{},todayDraws:0,lastDate:''});}
+function us(type){var s=gs();s.draws=(s.draws||0)+1;s.prizes=s.prizes||{};s.prizes[type]=(s.prizes[type]||0)+1;var td=new Date().toISOString().slice(0,10);if(s.lastDate!==td){s.todayDraws=0;s.lastDate=td;}s.todayDraws++;ss('lottery_stats',s);document.getElementById('statDraws').textContent=s.draws;}
+function gc(){return ls('lottery_codes',{dayCards:[],coupons:[],weekCards:[],hourCard:''});}
+function sc2(c){ss('lottery_codes',c);}
+function gcfg(){return ls('lottery_config',{feishuHook:'https://open.feishu.cn/open-apis/bot/v2/hook/c80f2fb7-a6e0-4832-8bcb-9b2a9a35da86'});}
+function scfg(c){ss('lottery_config',c);}
+
+var km={dayCard:'dayCards',coupon:'coupons',hourCard:'hourCard',weekCard:'weekCards'};
+function gCode(type){
+  var c=gc();if(type==='hourCard')return c.hourCard||'';
+  var arr=c[km[type]]||[];var ent=arr.find(function(x){return !x.used;});
+  if(ent){ent.used=true;sc2(c);return ent.code;}return null;
 }
 
-// ═══ 抽奖 ═══
-function startDraw() {
-  if (isSpinning) return;
-  isSpinning = true;
-  btnSpin.disabled = true;
-  wheelCanvas.classList.add('spinning');
-  var type = DRAW_POOL[Math.floor(Math.random() * DRAW_POOL.length)];
-  spinToTarget(type, function() {
-    updateLocalStats();
-    var prize = PRIZES[type];
-    var code = type === 'hourCard' ? 'HOUR-GENERAL-CODE' : type.substring(0,3).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
-    showResult(type, prize, code);
+// 每日抽奖上限
+var MAX_PER_DAY = 1;
+
+// 浏览器指纹
+function getFingerprint(){
+  var c=document.createElement('canvas');c.width=200;c.height=50;
+  var x=c.getContext('2d');x.textBaseline='top';x.font='14px Arial';x.fillStyle='#f60';x.fillRect(10,5,80,20);x.fillStyle='#069';x.fillText('Fingerprint!',2,15);
+  var fp=c.toDataURL().slice(-200);
+  fp+=navigator.hardwareConcurrency||'';fp+=screen.width+'x'+screen.height+screen.colorDepth;
+  fp+=(navigator.language||'')+(navigator.platform||'');
+  var h=0;for(var i=0;i<fp.length;i++){h=((h<<5)-h)+fp.charCodeAt(i);h|=0;}
+  return 'fp_'+Math.abs(h).toString(36);
+}
+
+function checkDailyLimit(){
+  var fp=getFingerprint();
+  var today=new Date().toISOString().slice(0,10);
+  var lim=ls('lottery_limit',{});
+  if(lim.date!==today){lim={date:today,counts:{}};}
+  var cnt=lim.counts[fp]||0;
+  return {allowed:cnt<MAX_PER_DAY, remaining:MAX_PER_DAY-cnt, count:cnt};
+}
+
+function recordDraw(){
+  var fp=getFingerprint();
+  var today=new Date().toISOString().slice(0,10);
+  var lim=ls('lottery_limit',{});
+  if(lim.date!==today){lim={date:today,counts:{}};}
+  lim.counts[fp]=(lim.counts[fp]||0)+1;
+  ss('lottery_limit',lim);
+}
+
+function startDraw(){
+  if(spinning)return;
+  var limit=checkDailyLimit();
+  if(!limit.allowed){showToast('今日抽奖次数已用完（'+(MAX_PER_DAY-limit.remaining)+'/'+MAX_PER_DAY+'），明天再来！');return;}
+  spinning=true;btn.disabled=true;wc.classList.add('spinning');
+  var type=DP[Math.floor(Math.random()*DP.length)];
+  stt(type,function(){
+    recordDraw();
+    us(type);var pr=P[type],code=gCode(type);
+    showResult(type,pr,code);if(code)sendFS(type,pr.name,code);
+    document.getElementById('statRemain').textContent=checkDailyLimit().remaining;
   });
 }
 
-// ═══ 结果弹窗 ═══
-function showResult(type, prize, code) {
-  document.getElementById('prizeIcon').textContent = prize.icon;
-  document.getElementById('prizeName').textContent = prize.name;
-  document.getElementById('prizeName').className = 'prize-name ' + type;
-  document.getElementById('prizeMsg').textContent = '恭喜获得' + prize.name + '！';
-  document.getElementById('prizeCodeWrap').classList.remove('hidden');
-  document.getElementById('prizeCode').textContent = code;
-  document.getElementById('downloadHint').textContent = '安装包正在自动下载...';
-  modalOverlay.classList.remove('hidden');
-  setTimeout(function() {
-    var a = document.createElement('a');
-    a.href = DOWNLOAD_URL;
-    a.download = '';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }, 800);
+function showResult(type,pr,code){
+  document.getElementById('prizeIcon').textContent=pr.icon;
+  document.getElementById('prizeName').textContent=pr.name;
+  document.getElementById('prizeName').className='prize-name '+type;
+  document.getElementById('prizeMsg').textContent=code?'恭喜获得'+pr.name+'！':'很遗憾，'+pr.name+'已被领完';
+  var cw=document.getElementById('prizeCodeWrap');
+  if(code){cw.classList.remove('hidden');document.getElementById('prizeCode').textContent=code;document.getElementById('downloadHint').textContent='安装包正在自动下载...';}else{cw.classList.add('hidden');document.getElementById('downloadHint').textContent='';}
+  mo.classList.remove('hidden');
+  if(code){setTimeout(function(){var a=document.createElement('a');a.href=DL;a.download='';a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);},800);}
+}
+function closeModal(){mo.classList.add('hidden');}
+mo.addEventListener('click',function(e){if(e.target===mo)closeModal();});
+
+function sendFS(type,name,code){
+  var colors={dayCard:'blue',coupon:'turquoise',hourCard:'green',weekCard:'red'};
+  var icons={dayCard:'☀️',coupon:'🎫',hourCard:'⏰',weekCard:'📅'};
+  var cfg=gcfg(),hook=cfg.feishuHook;if(!hook)return;
+  var msg={msg_type:'interactive',card:{header:{title:{tag:'plain_text',content:icons[type]+' '+name+' 被抽中！'},template:colors[type]||'blue'},elements:[{tag:'div',text:{tag:'lark_md',content:'**奖品**: '+icons[type]+' '+name+'\n**兑换码**: '+code+'\n**时间**: '+new Date().toLocaleString('zh-CN')+'\n**来源**: '+window.location.hostname}},{tag:'hr'},{tag:'note',elements:[{tag:'plain_text',content:'抽奖系统自动通知'}]}]}};
+  fetch(hook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)}).catch(function(){});
 }
 
-function closeModal() {
-  modalOverlay.classList.add('hidden');
-}
-
-modalOverlay.addEventListener('click', function(e) {
-  if (e.target === modalOverlay) closeModal();
-});
-
-function showToast(msg) {
-  var existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  var toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(function() { toast.remove(); }, 3000);
-}
-
-// ═══ 初始化 ═══
-drawWheel(0);
-var initStats = getLocalStats();
-document.getElementById('statDraws').textContent = initStats.draws || 0;
-
-document.getElementById('btnSpin').addEventListener('click', startDraw);
-document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-
-})(); // 防护IIFE结束
+dw(0);var is2=gs();document.getElementById('statDraws').textContent=is2.draws||0;
+var lim=checkDailyLimit();document.getElementById('statRemain').textContent=lim.remaining;
+document.getElementById('btnSpin').addEventListener('click',startDraw);
+document.getElementById('btnCloseModal').addEventListener('click',closeModal);
+})();
 </script>
-
 </body>
 </html>
