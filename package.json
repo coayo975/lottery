@@ -1,0 +1,13 @@
+{
+  "name": "lottery-system",
+  "version": "1.0.0",
+  "description": "科技游戏风抽奖系统 - 天天开心/优惠券/小时卡/周卡",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
