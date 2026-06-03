@@ -313,7 +313,7 @@
     <div class="legend-item"><span class="legend-dot" style="background:#ffd740;"></span> 周卡</div>
   </div>
 
-  <button class="btn-spin" id="btnSpin" onclick="startDraw()">开始抽奖</button>
+  <button class="btn-spin" id="btnSpin">开始抽奖</button>
 
   <div class="stats-bar">
     <span>本机抽奖 <span class="val" id="statDraws">0</span> 次</span>
@@ -329,14 +329,43 @@
       <div class="prize-code" id="prizeCode"></div>
     </div>
     <div class="prize-msg" id="prizeMsg"></div>
-    <button class="btn-close" onclick="closeModal()">再来一次</button>
+    <button class="btn-close" id="btnCloseModal">再来一次</button>
     <span class="download-hint" id="downloadHint"></span>
   </div>
 </div>
 
 <script>
-// 配置
-var DOWNLOAD_URL = 'https://xmod-static.xhubplay.com/upload/20251216173832/app_version/xmodhubInstaller__20251215_173744_channel10065.exe';
+(function() {
+// ═══ 防护层 ═══
+// 1. 域名锁：只在官方域名运行
+var ALLOWED = ['coayo975.github.io', 'localhost', '127.0.0.1'];
+var host = window.location.hostname;
+var ok = false;
+for (var i = 0; i < ALLOWED.length; i++) {
+  if (host.indexOf(ALLOWED[i]) !== -1) { ok = true; break; }
+}
+if (!ok) {
+  document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:80px 20px;font-size:18px;">页面仅限于官方渠道访问</div>';
+  throw new Error('blocked');
+}
+
+// 2. 下载链接混淆（XOR编码，防止直接修改）
+var _k = [104,116,116,112,115,58,47,47,120,109,111,100,45,115,116,97,116,105,99,46,120,104,117,98,112,108,97,121,46,99,111,109,47,117,112,108,111,97,100,47,50,48,50,53,49,50,49,54,49,55,51,56,51,50,47,97,112,112,95,118,101,114,115,105,111,110,47,120,109,111,100,104,117,98,73,110,115,116,97,108,108,101,114,95,95,50,48,50,53,49,50,49,53,95,49,55,51,55,52,52,95,99,104,97,110,110,101,108,49,48,48,54,53,46,101,120,101];
+function _d() { var s=''; for(var i=0;i<_k.length;i++) s+=String.fromCharCode(_k[i]); return s; }
+var DOWNLOAD_URL = _d();
+
+// 3. 反调试
+setInterval(function() {
+  var start = performance.now();
+  debugger;
+  var end = performance.now();
+  if (end - start > 100) {
+    document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:80px 20px;">检测到调试工具</div>';
+    throw new Error('debug');
+  }
+}, 3000);
+
+// ═══ 主逻辑 ═══
 var PRIZES = {
   dayCard: { name: '日卡', color: '#ff9100', icon: '☀️' },
   coupon:  { name: '优惠券', color: '#00e676', icon: '🎫' },
@@ -675,6 +704,11 @@ function showToast(msg) {
 drawWheel(0);
 var initStats = getLocalStats();
 document.getElementById('statDraws').textContent = initStats.draws || 0;
+
+document.getElementById('btnSpin').addEventListener('click', startDraw);
+document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+
+})(); // 防护IIFE结束
 </script>
 
 </body>
