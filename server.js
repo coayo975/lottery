@@ -39,7 +39,6 @@ function initData() {
 
   if (!fs.existsSync(CODES_FILE)) {
     saveJSON(CODES_FILE, {
-      hourCards: [],    // [{code, name, used, usedAt}]
       weekCards: [],
       coupons: [],
       dayCards: []
@@ -61,7 +60,8 @@ function initData() {
       feishuWebhook: 'https://open.feishu.cn/open-apis/bot/v2/hook/c80f2fb7-a6e0-4832-8bcb-9b2a9a35da86',
       downloadUrl: 'https://xmod-static.xhubplay.com/upload/20251216173832/app_version/xmodhubInstaller__20251215_173744_channel10065.exe',
       feishuReportHour: 20,
-      enabled: true
+      enabled: true,
+      hourCardCode: ''
     });
   }
 }
@@ -83,8 +83,13 @@ function drawPrize() {
 }
 
 // 获取可用兑换码
-const KEY_MAP = { hourCard: 'hourCards', weekCard: 'weekCards', coupon: 'coupons', dayCard: 'dayCards' };
+const KEY_MAP = { weekCard: 'weekCards', coupon: 'coupons', dayCard: 'dayCards' };
 function getAvailableCode(type) {
+  if (type === 'hourCard') {
+    const config = loadJSON(CONFIG_FILE, {});
+    if (!config.hourCardCode) return null;
+    return { code: config.hourCardCode, name: '通用码' };
+  }
   const codes = loadJSON(CODES_FILE, {});
   const arr = codes[KEY_MAP[type]] || [];
   const available = arr.find(c => !c.used);
@@ -93,6 +98,7 @@ function getAvailableCode(type) {
 
 // 标记已使用
 function markCodeUsed(type, code) {
+  if (type === 'hourCard') return; // 固定码，无需标记
   const codes = loadJSON(CODES_FILE, {});
   const arr = codes[KEY_MAP[type]] || [];
   const entry = arr.find(c => c.code === code);
@@ -216,7 +222,7 @@ app.get('/api/stats', (req, res) => {
       dayCards: { total: total('dayCards'), available: avail('dayCards') },
       coupons: { total: total('coupons'), available: avail('coupons') },
       weekCards: { total: total('weekCards'), available: avail('weekCards') },
-      hourCards: { total: total('hourCards'), available: avail('hourCards') }
+      hourCards: { total: -1, available: config.hourCardCode ? -1 : 0, code: config.hourCardCode || '' }
     },
     enabled: config.enabled !== false
   });
@@ -225,7 +231,7 @@ app.get('/api/stats', (req, res) => {
 // 导入兑换码（支持员工名）
 app.post('/api/codes/import', (req, res) => {
   const { type, codes: codeList } = req.body;
-  const validTypes = ['weekCard', 'coupon', 'dayCard', 'hourCard'];
+  const validTypes = ['weekCard', 'coupon', 'dayCard'];
   if (!validTypes.includes(type)) return res.status(400).json({ success: false, message: '类型无效' });
   if (!Array.isArray(codeList) || codeList.length === 0) return res.status(400).json({ success: false, message: '请提供兑换码列表' });
 
@@ -246,7 +252,7 @@ app.post('/api/codes/import', (req, res) => {
 // 导入兑换码（带员工名，格式：员工名,兑换码）
 app.post('/api/codes/import-named', (req, res) => {
   const { type, codes: codeList } = req.body;
-  const validTypes = ['weekCard', 'coupon', 'dayCard', 'hourCard'];
+  const validTypes = ['weekCard', 'coupon', 'dayCard'];
   if (!validTypes.includes(type)) return res.status(400).json({ success: false, message: '类型无效' });
   if (!Array.isArray(codeList) || codeList.length === 0) return res.status(400).json({ success: false, message: '请提供兑换码列表' });
 
@@ -281,6 +287,16 @@ app.post('/api/config/feishu', (req, res) => {
   const config = loadJSON(CONFIG_FILE, {});
   if (webhook !== undefined) config.feishuWebhook = webhook;
   if (reportHour !== undefined) config.feishuReportHour = parseInt(reportHour) || 20;
+  saveJSON(CONFIG_FILE, config);
+  res.json({ success: true });
+});
+
+// 小时卡固定码
+app.post('/api/config/hourcard', (req, res) => {
+  const { code } = req.body;
+  if (!code || !code.trim()) return res.status(400).json({ success: false, message: '请输入兑换码' });
+  const config = loadJSON(CONFIG_FILE, {});
+  config.hourCardCode = code.trim();
   saveJSON(CONFIG_FILE, config);
   res.json({ success: true });
 });
@@ -322,19 +338,4 @@ app.post('/api/feishu/report', async (req, res) => {
   } catch (e) { res.json({ success: false, message: e.message }); }
 });
 
-// 重置统计
-app.post('/api/stats/reset', (req, res) => {
-  saveJSON(STATS_FILE, { totalDraws: 0, totalUsers: 0, uniqueIPs: [], prizes: { dayCard: 0, coupon: 0, hourCard: 0, weekCard: 0 }, daily: {} });
-  res.json({ success: true });
-});
-
-// 管理后台
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-
-// ═══ 启动 ═══
-initData();
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API: http://localhost:${PORT}/api/stats`);
-  console.log(`Admin: http://localhost:${PORT}/admin`);
-});
+// 重置
