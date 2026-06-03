@@ -95,21 +95,11 @@ var host=window.location.hostname, ok=false;
 for(var i=0;i<ALLOWED.length;i++){if(host.indexOf(ALLOWED[i])!==-1){ok=true;break;}}
 if(!ok){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;font-size:18px;">页面仅限于官方渠道访问</div>';throw new Error('blocked');}
 
-var _k=[104,116,116,112,115,58,47,47,120,109,111,100,45,115,116,97,116,105,99,46,120,104,117,98,112,108,97,121,46,99,111,109,47,117,112,108,111,97,100,47,50,48,50,53,49,50,49,54,49,55,51,56,51,50,47,97,112,112,95,118,101,114,115,105,111,110,47,120,109,111,100,104,117,98,73,110,115,116,97,108,108,101,114,95,95,50,48,50,53,49,50,49,53,95,49,55,51,55,52,52,95,99,104,97,110,110,101,108,49,48,48,54,53,46,101,120,101];
-function _d(){var s='';for(var i=0;i<_k.length;i++)s+=String.fromCharCode(_k[i]);return s;}
-var DL=_d();
-
 setInterval(function(){var s=performance.now();debugger;var e=performance.now();if(e-s>100){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;">检测到调试工具</div>';throw new Error('debug');}},3000);
 
 var P={dayCard:{name:'日卡',color:'#ff9100',icon:'☀️'},coupon:{name:'优惠券',color:'#00e676',icon:'🎫'},hourCard:{name:'小时卡',color:'#b388ff',icon:'⏰'},weekCard:{name:'周卡',color:'#ffd740',icon:'📅'}};
 var S=['dayCard','coupon','hourCard','coupon','dayCard','coupon','hourCard','coupon','hourCard','coupon','hourCard','coupon','hourCard','coupon','hourCard','weekCard','dayCard','coupon','hourCard','weekCard'];
 var SN=S.length, SA=(2*Math.PI)/SN;
-var DP=[];
-for(var i=0;i<15;i++)DP.push('dayCard');
-for(var i=0;i<37;i++)DP.push('coupon');
-for(var i=0;i<40;i++)DP.push('hourCard');
-for(var i=0;i<8;i++)DP.push('weekCard');
-
 var wa=0,spinning=false;
 var wc=document.getElementById('wheelCanvas'),ctx=wc.getContext('2d');
 var btn=document.getElementById('btnSpin'),mo=document.getElementById('modalOverlay');
@@ -155,90 +145,86 @@ function stt(type,cb){
   }requestAnimationFrame(an);
 }
 
-function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
-function ss(k,v){localStorage.setItem(k,JSON.stringify(v));}
-function gs(){return ls('lottery_stats',{draws:0,prizes:{},todayDraws:0,lastDate:''});}
-function us(type){var s=gs();s.draws=(s.draws||0)+1;s.prizes=s.prizes||{};s.prizes[type]=(s.prizes[type]||0)+1;var td=new Date().toISOString().slice(0,10);if(s.lastDate!==td){s.todayDraws=0;s.lastDate=td;}s.todayDraws++;ss('lottery_stats',s);document.getElementById('statDraws').textContent=s.draws;}
-function gc(){return ls('lottery_codes',{dayCards:[],coupons:[],weekCards:[],hourCard:''});}
-function sc2(c){ss('lottery_codes',c);}
-function gcfg(){return ls('lottery_config',{feishuHook:'https://open.feishu.cn/open-apis/bot/v2/hook/c80f2fb7-a6e0-4832-8bcb-9b2a9a35da86'});}
-function scfg(c){ss('lottery_config',c);}
-
-var km={dayCard:'dayCards',coupon:'coupons',hourCard:'hourCard',weekCard:'weekCards'};
-function gCode(type){
-  var c=gc();if(type==='hourCard')return c.hourCard||'';
-  var arr=c[km[type]]||[];var ent=arr.find(function(x){return !x.used;});
-  if(ent){ent.used=true;sc2(c);return ent.code;}return null;
-}
-
-// 每日抽奖上限
+var API_BASE = 'https://lottery-xv6g.onrender.com';
 var MAX_PER_DAY = 1;
 
-// 浏览器指纹
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function ss(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
 function getFingerprint(){
   var c=document.createElement('canvas');c.width=200;c.height=50;
-  var x=c.getContext('2d');x.textBaseline='top';x.font='14px Arial';x.fillStyle='#f60';x.fillRect(10,5,80,20);x.fillStyle='#069';x.fillText('Fingerprint!',2,15);
-  var fp=c.toDataURL().slice(-200);
-  fp+=navigator.hardwareConcurrency||'';fp+=screen.width+'x'+screen.height+screen.colorDepth;
-  fp+=(navigator.language||'')+(navigator.platform||'');
+  var x=c.getContext('2d');x.textBaseline='top';x.font='14px Arial';x.fillStyle='#f60';x.fillRect(10,5,80,20);x.fillStyle='#069';x.fillText('FP!',2,15);
+  var fp=c.toDataURL().slice(-200)+navigator.hardwareConcurrency+screen.width+'x'+screen.height+(navigator.language||'')+(navigator.platform||'');
   var h=0;for(var i=0;i<fp.length;i++){h=((h<<5)-h)+fp.charCodeAt(i);h|=0;}
   return 'fp_'+Math.abs(h).toString(36);
 }
 
 function checkDailyLimit(){
-  var fp=getFingerprint();
-  var today=new Date().toISOString().slice(0,10);
-  var lim=ls('lottery_limit',{});
-  if(lim.date!==today){lim={date:today,counts:{}};}
+  var fp=getFingerprint(),today=new Date().toISOString().slice(0,10),lim=ls('lottery_limit',{date:today,counts:{}});
+  if(lim.date!==today)lim={date:today,counts:{}};
   var cnt=lim.counts[fp]||0;
-  return {allowed:cnt<MAX_PER_DAY, remaining:MAX_PER_DAY-cnt, count:cnt};
+  return {allowed:cnt<MAX_PER_DAY,remaining:MAX_PER_DAY-cnt,count:cnt};
 }
 
 function recordDraw(){
-  var fp=getFingerprint();
-  var today=new Date().toISOString().slice(0,10);
-  var lim=ls('lottery_limit',{});
-  if(lim.date!==today){lim={date:today,counts:{}};}
-  lim.counts[fp]=(lim.counts[fp]||0)+1;
-  ss('lottery_limit',lim);
+  var fp=getFingerprint(),today=new Date().toISOString().slice(0,10),lim=ls('lottery_limit',{date:today,counts:{}});
+  if(lim.date!==today)lim={date:today,counts:{}};
+  lim.counts[fp]=(lim.counts[fp]||0)+1;ss('lottery_limit',lim);
+}
+
+function showToast(msg){
+  var e=document.createElement('div');e.className='toast';e.textContent=msg;document.body.appendChild(e);
+  setTimeout(function(){e.remove();},3000);
+}
+
+function loadStats(){
+  fetch(API_BASE+'/api/stats').then(function(r){return r.json();}).then(function(d){
+    document.getElementById('statDraws').textContent=d.totalDraws||0;
+  }).catch(function(){});
+}
+function saveLocalStats(type){
+  var s=ls('lottery_stats',{draws:0});s.draws=(s.draws||0)+1;ss('lottery_stats',s);
 }
 
 function startDraw(){
   if(spinning)return;
   var limit=checkDailyLimit();
-  if(!limit.allowed){showToast('今日抽奖次数已用完（'+(MAX_PER_DAY-limit.remaining)+'/'+MAX_PER_DAY+'），明天再来！');return;}
+  if(!limit.allowed){showToast('今日次数已用完，明天再来！');return;}
   spinning=true;btn.disabled=true;wc.classList.add('spinning');
-  var type=DP[Math.floor(Math.random()*DP.length)];
-  stt(type,function(){
+
+  fetch(API_BASE+'/api/draw',{method:'POST'}).then(function(r){return r.json();}).then(function(data){
+    if(!data.success){spinning=false;btn.disabled=false;wc.classList.remove('spinning');showToast(data.message||'活动暂不可用');return;}
     recordDraw();
-    us(type);var pr=P[type],code=gCode(type);
-    showResult(type,pr,code);if(code)sendFS(type,pr.name,code);
-    document.getElementById('statRemain').textContent=checkDailyLimit().remaining;
+    saveLocalStats(data.prizeType);
+    stt(data.prizeType,function(){
+      showResult(data);
+      document.getElementById('statRemain').textContent=checkDailyLimit().remaining;
+      loadStats();
+    });
+  }).catch(function(err){
+    spinning=false;btn.disabled=false;wc.classList.remove('spinning');
+    showToast('网络错误，请重试');
   });
 }
 
-function showResult(type,pr,code){
+function showResult(data){
+  var type=data.prizeType,pr=P[type],code=data.code;
+  var empTxt=data.employeeName?'（'+data.employeeName+'）':'';
   document.getElementById('prizeIcon').textContent=pr.icon;
-  document.getElementById('prizeName').textContent=pr.name;
+  document.getElementById('prizeName').textContent=pr.name+empTxt;
   document.getElementById('prizeName').className='prize-name '+type;
-  document.getElementById('prizeMsg').textContent=code?'恭喜获得'+pr.name+'！':'很遗憾，'+pr.name+'已被领完';
+  document.getElementById('prizeMsg').textContent=data.message;
   var cw=document.getElementById('prizeCodeWrap');
-  if(code){cw.classList.remove('hidden');document.getElementById('prizeCode').textContent=code;document.getElementById('downloadHint').textContent='安装包正在自动下载...';}else{cw.classList.add('hidden');document.getElementById('downloadHint').textContent='';}
+  if(code){cw.classList.remove('hidden');document.getElementById('prizeCode').textContent=code;document.getElementById('downloadHint').textContent='安装包正在自动下载...';}
+  else{cw.classList.add('hidden');document.getElementById('downloadHint').textContent='';}
   mo.classList.remove('hidden');
-  if(code){setTimeout(function(){var a=document.createElement('a');a.href=DL;a.download='';a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);},800);}
+  if(code&&data.downloadUrl){setTimeout(function(){var a=document.createElement('a');a.href=data.downloadUrl;a.download='';a.style.display='none';document.body.appendChild(a);a.click();document.body.removeChild(a);},800);}
 }
+
 function closeModal(){mo.classList.add('hidden');}
 mo.addEventListener('click',function(e){if(e.target===mo)closeModal();});
 
-function sendFS(type,name,code){
-  var colors={dayCard:'blue',coupon:'turquoise',hourCard:'green',weekCard:'red'};
-  var icons={dayCard:'☀️',coupon:'🎫',hourCard:'⏰',weekCard:'📅'};
-  var cfg=gcfg(),hook=cfg.feishuHook;if(!hook)return;
-  var msg={msg_type:'interactive',card:{header:{title:{tag:'plain_text',content:icons[type]+' '+name+' 被抽中！'},template:colors[type]||'blue'},elements:[{tag:'div',text:{tag:'lark_md',content:'**奖品**: '+icons[type]+' '+name+'\n**兑换码**: '+code+'\n**时间**: '+new Date().toLocaleString('zh-CN')+'\n**来源**: '+window.location.hostname}},{tag:'hr'},{tag:'note',elements:[{tag:'plain_text',content:'抽奖系统自动通知'}]}]}};
-  fetch(hook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)}).catch(function(){});
-}
-
-dw(0);var is2=gs();document.getElementById('statDraws').textContent=is2.draws||0;
+dw(0);loadStats();
 var lim=checkDailyLimit();document.getElementById('statRemain').textContent=lim.remaining;
 document.getElementById('btnSpin').addEventListener('click',startDraw);
 document.getElementById('btnCloseModal').addEventListener('click',closeModal);
@@ -246,3 +232,4 @@ document.getElementById('btnCloseModal').addEventListener('click',closeModal);
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
