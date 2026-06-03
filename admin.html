@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台</title>
+<style>
+  :root { --bg:#0a0a1a; --cyan:#00f0ff; --purple:#b400ff; --pink:#ff2d95; --gold:#ffd740; --green:#00e676; --red:#ff5252; --text:#e0e0ff; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; min-height:100vh; padding:24px; }
+  h1 { font-size:24px; font-weight:900; letter-spacing:2px; margin-bottom:24px; background:linear-gradient(135deg,var(--cyan),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:32px; }
+  .card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px; }
+  .card .l { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:6px; }
+  .card .v { font-size:24px; font-weight:900; color:var(--cyan); }
+  .card .s { font-size:11px; color:rgba(255,255,255,0.35); margin-top:4px; }
+  .section { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:24px; margin-bottom:24px; max-width:700px; }
+  .section h2 { font-size:16px; color:rgba(255,255,255,0.6); margin-bottom:16px; letter-spacing:1px; }
+  .row { display:flex; justify-content:space-between; padding:8px 0; font-size:14px; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .row .n { color:var(--cyan); font-weight:700; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; padding:8px 12px; color:rgba(255,255,255,0.4); font-size:11px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.06); }
+  td { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .badge { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge.ok { background:rgba(0,230,118,0.1); color:var(--green); }
+  .badge.used { background:rgba(255,82,82,0.1); color:var(--red); }
+  input, textarea, select { width:100%; padding:10px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:14px; font-family:inherit; margin-bottom:12px; }
+  textarea { min-height:100px; font-family:'Courier New',monospace; font-size:13px; line-height:1.8; resize:vertical; }
+  .btn { padding:10px 24px; border:none; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; letter-spacing:1px; }
+  .btn-p { background:linear-gradient(135deg,var(--cyan),var(--purple)); color:#fff; }
+  .btn-t { background:linear-gradient(135deg,#ffd740,#ff9100); color:#fff; margin-left:8px; }
+  .msg { margin-top:10px; font-size:13px; min-height:20px; }
+  .tab-bar { display:flex; gap:8px; margin-bottom:24px; }
+  .tab-bar button { padding:8px 18px; background:none; border:1px solid rgba(255,255,255,0.1); border-radius:20px; color:rgba(255,255,255,0.5); cursor:pointer; font-size:13px; transition:all 0.2s; }
+  .tab-bar button:hover, .tab-bar button.on { border-color:var(--cyan); color:var(--cyan); background:rgba(0,240,255,0.05); }
+</style>
+</head>
+<body>
+
+<h1>管理后台</h1>
+
+<div class="tab-bar">
+  <button class="on" onclick="switchTab('overview')">概览</button>
+  <button onclick="switchTab('import')">导入兑换码</button>
+  <button onclick="switchTab('codes')">查看码库</button>
+  <button onclick="switchTab('settings')">设置</button>
+</div>
+
+<!-- 概览 -->
+<div id="tab-overview">
+  <div class="cards">
+    <div class="card"><div class="l">总抽奖次数</div><div class="v" id="ovDraws">-</div></div>
+    <div class="card"><div class="l">今日抽奖</div><div class="v" id="ovToday">-</div></div>
+  </div>
+  <div class="section"><h2>兑换码结余</h2>
+    <div class="row"><span>日卡</span><span class="n" id="ovDay">-</span></div>
+    <div class="row"><span>优惠券</span><span class="n" id="ovCoupon">-</span></div>
+    <div class="row"><span>周卡</span><span class="n" id="ovWeek">-</span></div>
+    <div class="row"><span>小时卡</span><span class="n" id="ovHour">-</span></div>
+  </div>
+  <div class="section"><h2>奖品中奖分布</h2>
+    <div class="row"><span>日卡</span><span class="n" id="ovPDay">0</span></div>
+    <div class="row"><span>优惠券</span><span class="n" id="ovPCoupon">0</span></div>
+    <div class="row"><span>小时卡</span><span class="n" id="ovPHour">0</span></div>
+    <div class="row"><span>周卡</span><span class="n" id="ovPWeek">0</span></div>
+  </div>
+</div>
+
+<!-- 导入 -->
+<div id="tab-import" style="display:none">
+  <div class="section"><h2>导入兑换码</h2>
+    <select id="impType"><option value="dayCard">日卡</option><option value="coupon">优惠券</option><option value="weekCard">周卡</option></select>
+    <textarea id="impCodeList" placeholder="一行一个兑换码"></textarea>
+    <button class="btn btn-p" id="impBtn">导入</button>
+    <div class="msg" id="impMsg"></div>
+  </div>
+</div>
+
+<!-- 码库 -->
+<div id="tab-codes" style="display:none">
+  <div class="section"><h2>查看码库</h2>
+    <div class="tab-bar" style="margin-bottom:16px;">
+      <button class="on" onclick="viewCodes('dayCard')">日卡</button>
+      <button onclick="viewCodes('coupon')">优惠券</button>
+      <button onclick="viewCodes('weekCard')">周卡</button>
+    </div>
+    <div id="codeView"><div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);">选择类型查看</div></div>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div id="tab-settings" style="display:none">
+  <div class="section"><h2>小时卡通用码</h2>
+    <input type="text" id="setHourCode" placeholder="设置小时卡通用兑换码">
+    <button class="btn btn-p" id="setHourBtn">保存</button>
+    <div class="msg" id="setHourMsg"></div>
+  </div>
+  <div class="section"><h2>飞书通知</h2>
+    <input type="text" id="setFeishuHook" placeholder="飞书 Webhook 地址">
+    <button class="btn btn-p" id="setFeishuBtn">保存</button>
+    <button class="btn btn-t" id="setFeishuTest">测试</button>
+    <div class="msg" id="setFeishuMsg"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+var ALLOWED=['coayo975.github.io','localhost','127.0.0.1'];
+var host=window.location.hostname, ok=false;
+for(var i=0;i<ALLOWED.length;i++){if(host.indexOf(ALLOWED[i])!==-1){ok=true;break;}}
+if(!ok){document.body.innerHTML='<div style="color:#fff;text-align:center;padding:80px 20px;font-size:18px;">页面仅限于官方渠道访问</div>';throw new Error('blocked');}
+
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function ss(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function gs(){return ls('lottery_stats',{draws:0,prizes:{},todayDraws:0,lastDate:''});}
+function gc(){return ls('lottery_codes',{dayCards:[],coupons:[],weekCards:[],hourCard:''});}
+function sc(c){ss('lottery_codes',c);}
+function gcfg(){return ls('lottery_config',{feishuHook:'https://open.feishu.cn/open-apis/bot/v2/hook/c80f2fb7-a6e0-4832-8bcb-9b2a9a35da86'});}
+function scfg(c){ss('lottery_config',c);}
+
+// 标签切换
+function switchTab(t){
+  ['overview','import','codes','settings'].forEach(function(id){document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
+  var btns=document.querySelectorAll('.tab-bar button');btns.forEach(function(b){b.className='';});
+  if(t==='overview'){refreshOverview();}
+  if(t==='codes'){viewCodes('dayCard');}
+  if(t==='settings'){loadSettings();}
+  if(t==='import'){document.getElementById('impMsg').textContent='';}
+}
+window.switchTab=switchTab;
+
+// 概览
+function refreshOverview(){
+  var s=gs();document.getElementById('ovDraws').textContent=s.draws||0;document.getElementById('ovToday').textContent=s.todayDraws||0;
+  var c=gc(),da=(c.dayCards||[]).filter(function(x){return !x.used;}).length,ca=(c.coupons||[]).filter(function(x){return !x.used;}).length,wa=(c.weekCards||[]).filter(function(x){return !x.used;}).length;
+  document.getElementById('ovDay').textContent=da+'/'+(c.dayCards||[]).length;
+  document.getElementById('ovCoupon').textContent=ca+'/'+(c.coupons||[]).length;
+  document.getElementById('ovWeek').textContent=wa+'/'+(c.weekCards||[]).length;
+  document.getElementById('ovHour').textContent=c.hourCard?'已设置（通用码）':'未设置';
+  var p=s.prizes||{};document.getElementById('ovPDay').textContent=p.dayCard||0;document.getElementById('ovPCoupon').textContent=p.coupon||0;document.getElementById('ovPHour').textContent=p.hourCard||0;document.getElementById('ovPWeek').textContent=p.weekCard||0;
+}
+
+// 导入
+document.getElementById('impBtn').addEventListener('click',function(){
+  var type=document.getElementById('impType').value,raw=document.getElementById('impCodeList').value;
+  var list=raw.split(/[\n\r]+/).map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
+  if(!list.length){document.getElementById('impMsg').textContent='请输入兑换码';return;}
+  var c=gc(),kk={dayCard:'dayCards',coupon:'coupons',weekCard:'weekCards'},key=kk[type];
+  var ex={};(c[key]||[]).forEach(function(x){ex[x.code]=true;});
+  var added=0;list.forEach(function(code){if(!ex[code]){c[key].push({code:code,used:false});ex[code]=true;added++;}});
+  sc(c);
+  document.getElementById('impMsg').style.color='#00e676';document.getElementById('impMsg').textContent='导入 '+added+' 个（跳过 '+(list.length-added)+' 重复），共 '+c[key].length+' 个';
+  document.getElementById('impCodeList').value='';
+});
+
+// 查看码库
+function viewCodes(type){
+  var c=gc(),kk={dayCard:'dayCards',coupon:'coupons',weekCard:'weekCards'},arr=c[kk[type]]||[];
+  var used=arr.filter(function(x){return x.used;}).length,avail=arr.length-used;
+  var btnRow=document.querySelectorAll('#tab-codes .tab-bar button');
+  btnRow.forEach(function(b,i){
+    var t2=['dayCard','coupon','weekCard'][i];
+    b.className=t2===type?'on':'';
+  });
+  if(arr.length===0){document.getElementById('codeView').innerHTML='<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);">暂无兑换码</div>';return;}
+  var h='<div style="margin-bottom:12px;font-size:13px;color:rgba(255,255,255,0.5);">共 '+arr.length+' 个，可用 '+avail+' 个，已用 '+used+' 个</div><table><thead><tr><th>#</th><th>兑换码</th><th>状态</th><th>使用时间</th></tr></thead><tbody>';
+  arr.forEach(function(item,i){h+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;">'+item.code+'</td><td><span class="badge '+(item.used?'used':'ok')+'">'+(item.used?'已使用':'可用')+'</span></td><td style="font-size:12px;color:rgba(255,255,255,0.35);">'+(item.usedAt?new Date(item.usedAt).toLocaleString('zh-CN'):'-')+'</td></tr>';});
+  h+='</tbody></table>';document.getElementById('codeView').innerHTML=h;
+}
+window.viewCodes=viewCodes;
+
+// 设置
+function loadSettings(){
+  var c=gc(),cfg=gcfg();document.getElementById('setHourCode').value=c.hourCard||'';document.getElementById('setFeishuHook').value=cfg.feishuHook||'';
+}
+document.getElementById('setHourBtn').addEventListener('click',function(){
+  var code=document.getElementById('setHourCode').value.trim();if(!code){document.getElementById('setHourMsg').textContent='请输入兑换码';return;}
+  var c=gc();c.hourCard=code;sc(c);document.getElementById('setHourMsg').style.color='#00e676';document.getElementById('setHourMsg').textContent='已保存';
+});
+document.getElementById('setFeishuBtn').addEventListener('click',function(){
+  var cfg=gcfg();cfg.feishuHook=document.getElementById('setFeishuHook').value.trim();scfg(cfg);
+  document.getElementById('setFeishuMsg').style.color='#00e676';document.getElementById('setFeishuMsg').textContent='已保存';
+});
+document.getElementById('setFeishuTest').addEventListener('click',function(){
+  var hook=document.getElementById('setFeishuHook').value.trim();if(!hook){document.getElementById('setFeishuMsg').textContent='请先填写 Webhook';return;}
+  document.getElementById('setFeishuMsg').style.color='#ffd740';document.getElementById('setFeishuMsg').textContent='发送中...';
+  fetch(hook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msg_type:'interactive',card:{header:{title:{tag:'plain_text',content:'测试成功'},template:'blue'},elements:[{tag:'div',text:{tag:'lark_md',content:'飞书机器人配置正确！抽奖通知将发送到此群。'}}]}})})
+  .then(function(r){if(r.ok){document.getElementById('setFeishuMsg').style.color='#00e676';document.getElementById('setFeishuMsg').textContent='测试成功！';}else{document.getElementById('setFeishuMsg').style.color='#ff5252';document.getElementById('setFeishuMsg').textContent='发送失败';}})
+  .catch(function(){document.getElementById('setFeishuMsg').style.color='#ff5252';document.getElementById('setFeishuMsg').textContent='网络错误';});
+});
+
+refreshOverview();
+})();
+</script>
+
+</body>
+</html>
